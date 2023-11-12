@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from item_constants import *
+
 
 class GildedRose(object):
 
@@ -7,44 +9,53 @@ class GildedRose(object):
 
     def update_quality(self):
         for item in self.items:
-            if self.is_regular_item(item):
-                self.try_decreasing_quality(item)
-            elif item.name == "Aged Brie":
-                self.try_increasing_quality(item)
-            elif item.name == "Backstage passes to a TAFKAL80ETC concert":
-                self.try_increasing_quality(item)
+            if GildedRose.is_regular_item(item):
+                GildedRose.try_decreasing_quality(item)
+            elif item.name == AGED_BRIE:
+                GildedRose.try_increasing_quality(item)
+            elif item.name == BACKSTAGE:
+                GildedRose.try_increasing_quality(item)
                 if item.sell_in < 11:
-                    self.try_increasing_quality(item)
+                    GildedRose.try_increasing_quality(item)
 
                 if item.sell_in < 6:
-                    self.try_increasing_quality(item)
+                    GildedRose.try_increasing_quality(item)
 
-            if item.name != "Sulfuras, Hand of Ragnaros":
+            if item.name != SULFURAS:
                 item.sell_in = item.sell_in - 1
 
-            if item.sell_in < 0:
-                if self.is_regular_item(item):
-                    self.try_decreasing_quality(item)
-                elif item.name == "Aged Brie":
-                    self.try_increasing_quality(item)
-                elif item.name == "Backstage passes to a TAFKAL80ETC concert":
+            if GildedRose.is_selling_date_passed(item):
+                if GildedRose.is_regular_item(item):
+                    GildedRose.try_decreasing_quality(item)
+                elif item.name == AGED_BRIE:
+                    GildedRose.try_increasing_quality(item)
+                elif item.name == BACKSTAGE:
                     item.quality = 0
 
-    def try_decreasing_quality(self, item):
-        if self.has_quality(item):
+    @staticmethod
+    def is_selling_date_passed(item):
+        return item.sell_in < 0
+
+    @staticmethod
+    def try_decreasing_quality(item):
+        if GildedRose.has_quality(item):
             item.quality = item.quality - 1
 
-    def has_quality(self, item):
+    @staticmethod
+    def has_quality(item):
         return item.quality > 0
 
-    def try_increasing_quality(self, item):
-        if self.is_quality_not_too_high(item):
+    @staticmethod
+    def try_increasing_quality(item):
+        if GildedRose.is_quality_not_too_high(item):
             item.quality = item.quality + 1
 
-    def is_quality_not_too_high(self, item):
+    @staticmethod
+    def is_quality_not_too_high(item):
         return item.quality < 50
 
-    def is_regular_item(self, item):
+    @staticmethod
+    def is_regular_item(item):
         return item.name != "Aged Brie" and item.name != "Backstage passes to a TAFKAL80ETC concert" and item.name != "Sulfuras, Hand of Ragnaros"
 
 
