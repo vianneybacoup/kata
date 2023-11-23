@@ -7,6 +7,19 @@ def create_game_with_n_players(game: Game, n):
         game.add("foo" + str(i))
     return game
 
+def odd_roll(game):
+    game.roll(1)
+
+def next_player_roll_even(game):
+    game.roll(2)
+
+
+class GameMock(Game):
+    asked_question_called_count = 0
+
+    def _ask_question(self):
+        self.asked_question_called_count += 1
+
 
 class TrivaTest(unittest.TestCase):
     def test_when_less_than_two_players_game_should_not_be_playable(self):
@@ -27,6 +40,26 @@ class TrivaTest(unittest.TestCase):
         game.places[0] = 11
         game.roll(1)
         self.assertEqual(0, game.places[0])
+
+    def test_when_wrong_answer_player_should_be_in_penalty_box(self):
+        game = create_game_with_n_players(Game(), 1)
+        game.wrong_answer()
+        self.assertTrue(game.in_penalty_box[0])
+
+    def test_when_in_penalty_box_and_roll_odd_and_correct_answer_should_be_out(self):
+        game = create_game_with_n_players(Game(), 1)
+        game.in_penalty_box[0] = True
+
+        odd_roll(game)
+        game.was_correctly_answered()
+        self.assertFalse(game.in_penalty_box[0])
+        
+    def test_when_in_penalty_box_and_roll_even_no_question_asked(self):
+        game = create_game_with_n_players(GameMock(), 1)
+        game.in_penalty_box[0] = True
+
+        next_player_roll_even(game)
+        self.assertEqual(game.asked_question_called_count, 0)
 
 
 if __name__ == '__main__':
