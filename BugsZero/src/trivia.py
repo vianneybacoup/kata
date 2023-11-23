@@ -6,9 +6,9 @@ class Game:
     def __init__(self):
 
         self.players = []
-        self.places = [0] * 6
-        self.purses = [0] * 6
-        self.in_penalty_box = [0] * 6
+        self.places = []
+        self.purses = []
+        self.in_penalty_box = []
 
         self.pop_questions = []
         self.science_questions = []
@@ -28,18 +28,25 @@ class Game:
         return "Rock Question %s" % index
 
     def is_playable(self):
-        return self.how_many_players >= 2
+        return self.how_many_players >= 2 and self.how_many_players <= 6
 
     def add(self, player_name):
+        if (self._has_maximum_players()):
+            raise Exception("Maximum players reached")
+
         self.players.append(player_name)
-        self.places[self.how_many_players] = 0
-        self.purses[self.how_many_players] = 0
-        self.in_penalty_box[self.how_many_players] = False
+
+        self.places.append(0)
+        self.purses.append(0)
+        self.in_penalty_box.append(False)
 
         print(player_name + " was added")
         print("They are player number %s" % len(self.players))
 
         return True
+
+    def _has_maximum_players(self):
+        return self.how_many_players >= 6
 
     @property
     def how_many_players(self):
