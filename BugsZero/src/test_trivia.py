@@ -1,8 +1,13 @@
 import unittest
 
-from trivia import Game
+from trivia import Game, Logger
+
+class NoLogger(Logger):
+    def log(self, str):
+        pass
 
 def create_game_with_n_players(game: Game, n):
+    game.logger = NoLogger()
     for i in range(n):
         game.add("foo" + str(i))
     return game
@@ -35,6 +40,8 @@ class TrivaTest(unittest.TestCase):
         with self.assertRaises(Exception):
              create_game_with_n_players(Game(), 7)
 
+    ########
+
     def test_when_rolling_a_dice_while_player_is_on_last_box(self):
         game = create_game_with_n_players(Game(), 1)
         game.places[0] = 11
@@ -49,7 +56,6 @@ class TrivaTest(unittest.TestCase):
     def test_when_in_penalty_box_and_roll_odd_and_correct_answer_should_be_out(self):
         game = create_game_with_n_players(Game(), 1)
         game.in_penalty_box[0] = True
-
         odd_roll(game)
         game.was_correctly_answered()
         self.assertFalse(game.in_penalty_box[0])
@@ -57,10 +63,45 @@ class TrivaTest(unittest.TestCase):
     def test_when_in_penalty_box_and_roll_even_no_question_asked(self):
         game = create_game_with_n_players(GameMock(), 1)
         game.in_penalty_box[0] = True
-
         next_player_roll_even(game)
         self.assertEqual(game.asked_question_called_count, 0)
 
+    def test_it_cannot_run_out_of_question(self):
+        game = create_game_with_n_players(Game(), 1)
+        for _ in range(2000):
+            game._ask_question()
+        
+    def test_question_category_at_correct_place(self):
+        game = create_game_with_n_players(Game(), 1)
+        for i in range(0, 12):
+            game.places[game.current_player] = i
+            if i == 0: self.assertEqual(game._current_category, 'Pop')
+            elif i == 4: self.assertEqual(game._current_category, 'Pop')
+            elif i == 8: self.assertEqual(game._current_category, 'Pop')
+            elif i == 1: self.assertEqual(game._current_category, 'Science')
+            elif i == 5: self.assertEqual(game._current_category, 'Science')
+            elif i == 9: self.assertEqual(game._current_category, 'Science')
+            elif i == 2: self.assertEqual(game._current_category, 'Sports')
+            elif i == 6: self.assertEqual(game._current_category, 'Sports')
+            elif i == 10: self.assertEqual(game._current_category, 'Sports')
+            else: self.assertEqual(game._current_category, 'Rock')
+
+    def test_each_player_playing_after_each_other(self):
+        game = create_game_with_n_players(Game(), 4)
+        self.assertEqual(game.current_player, 0)
+        game.was_correctly_answered()
+
+        self.assertEqual(game.current_player, 1)
+        game.was_correctly_answered()
+        
+        self.assertEqual(game.current_player, 2)
+        game.was_correctly_answered()
+        
+        self.assertEqual(game.current_player, 3)
+        game.was_correctly_answered()
+        
+        self.assertEqual(game.current_player, 0)
+        game.was_correctly_answered()
 
 if __name__ == '__main__':
     unittest.main()
